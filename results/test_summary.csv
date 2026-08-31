@@ -1,0 +1,10 @@
+Test,Passed,Message
+CRC-16 reference vector,1,PASS
+Frame construction,1,PASS
+Balanced hopping,1,PASS
+Noiseless end-to-end links,1,PASS
+AWGN BPSK theory,1,PASS
+Hop acquisition,1,PASS
+Deliberate misalignment,1,PASS
+FHSS/fixed no-jammer equivalence,1,PASS
+Base-MATLAB dependency scan,1,PASS
