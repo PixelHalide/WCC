@@ -1,7 +1,7 @@
 function out = simulate_packet(cfg, scenario, mode)
 %SIMULATE_PACKET Simulate one framed FHSS or fixed-frequency packet.
 %   OUT = SIMULATE_PACKET(CFG, SCENARIO, MODE), where MODE is "waveform"
-%   or "symbol". Symbol mode is the validated fast Monte Carlo abstraction.
+%   or "symbol". Symbol mode is an ideal channel-isolation approximation.
 
 if nargin < 1 || isempty(cfg)
     cfg = fhss_config();
@@ -13,6 +13,8 @@ if nargin < 3
     mode = 'waveform';
 end
 scenario = scenario_defaults(cfg, scenario);
+% Both radios must use the packet's seed, not the configuration's old seed.
+cfg.seeds.hop = scenario.hopSeed;
 frame = build_frame(cfg, scenario.frameId, scenario.payload);
 
 switch lower(char(mode))
@@ -32,7 +34,8 @@ function out = simulate_waveform(cfg, frame, scenario)
 if ~strcmp(scenario.linkType, 'fhss')
     error('fhss:WaveformLink', 'Waveform mode currently models the FHSS link.');
 end
-tx = fhss_transmitter(cfg, frame.bits, scenario.symbolsPerHop, cfg.hopStartIndex);
+tx = fhss_transmitter(cfg, frame.bits, scenario.symbolsPerHop, ...
+    cfg.hopStartIndex + scenario.txCodeOffset);
 dwellSamples = scenario.symbolsPerHop * cfg.samplesPerSymbol;
 if isempty(scenario.timingOffsetSamples)
     timingStream = RandStream('mt19937ar', 'Seed', scenario.timingSeed);
@@ -54,7 +57,7 @@ end
 function out = simulate_symbols(cfg, frame, scenario)
 nSymbols = cfg.frameBits;
 nHopsTx = ceil(nSymbols / scenario.symbolsPerHop);
-txHopIndices = hop_sequence(cfg, nHopsTx, cfg.hopStartIndex);
+txHopIndices = hop_sequence(cfg, nHopsTx, cfg.hopStartIndex + scenario.txCodeOffset);
 txChannels = repelem(txHopIndices, scenario.symbolsPerHop);
 txChannels = txChannels(1:nSymbols);
 jamChannels = jammed_channels(cfg, scenario.jammerOccupancy);
@@ -101,7 +104,12 @@ else
 end
 jammerDecision = zeros(1, nSymbols);
 if ~isempty(jamChannels) && isfinite(scenario.jsDb)
-    jammed = ismember(txCarrier, jamChannels);
+    if strcmp(scenario.linkType, 'fhss')
+        listeningCarrier = rxCarrier;
+    else
+        listeningCarrier = txCarrier;
+    end
+    jammed = ismember(listeningCarrier, jamChannels);
     perChannelPower = 10^(scenario.jsDb/10) / numel(jamChannels);
     jammerStream = RandStream('mt19937ar', 'Seed', scenario.jammerSeed);
     jammerDecision(jammed) = sqrt(perChannelPower/2) * ...
@@ -139,7 +147,7 @@ function scenario = scenario_defaults(cfg, scenario)
 defaults = struct('frameId', 0, 'payload', [], 'symbolsPerHop', cfg.symbolsPerHop, ...
     'ebNoDb', cfg.defaultEbNoDb, 'jammerOccupancy', cfg.defaultJammerOccupancy, ...
     'jsDb', cfg.defaultJsDb, 'linkType', 'fhss', 'acquire', true, ...
-    'codeOffset', 0, 'rateError', 0, 'timingOffsetSamples', [], ...
+    'codeOffset', 0, 'txCodeOffset', 0, 'rateError', 0, 'timingOffsetSamples', [], ...
     'noiseSeed', cfg.seeds.noise, 'jammerSeed', cfg.seeds.jammer, ...
     'timingSeed', cfg.seeds.timing, 'hopSeed', cfg.seeds.hop);
 names = fieldnames(defaults);
@@ -148,6 +156,26 @@ for k = 1:numel(names)
         scenario.(names{k}) = defaults.(names{k});
     end
 end
+validateattributes(scenario.symbolsPerHop, {'numeric'}, {'scalar','integer','positive','finite'});
+validateattributes(scenario.rateError, {'numeric'}, {'scalar','finite','>',-1});
+validateattributes(scenario.ebNoDb, {'numeric'}, {'scalar','real','nonnan'});
+validateattributes(scenario.jsDb, {'numeric'}, {'scalar','real','nonnan'});
+if scenario.ebNoDb == -Inf
+    error('fhss:EbNo', 'Use finite Eb/N0 or +Inf for noiseless operation.');
+end
+validateattributes(scenario.codeOffset, {'numeric'}, {'scalar','integer','finite'});
+validateattributes(scenario.txCodeOffset, {'numeric'}, {'scalar','integer','finite'});
+if cfg.hopStartIndex + min(scenario.codeOffset, scenario.txCodeOffset) < 1
+    error('fhss:CodeOffset', 'Code offsets must leave a positive hop index.');
+end
+if ~isempty(scenario.timingOffsetSamples)
+    validateattributes(scenario.timingOffsetSamples, {'numeric'}, ...
+        {'scalar','integer','nonnegative','finite'});
+    if scenario.acquire && scenario.timingOffsetSamples >= scenario.symbolsPerHop*cfg.samplesPerSymbol
+        error('fhss:TimingSearch', 'Acquisition searches timing within one dwell only.');
+    end
+end
+jammed_channels(cfg, scenario.jammerOccupancy);
 if mod(cfg.frameBits, scenario.symbolsPerHop) ~= 0
     error('fhss:ScenarioHop', 'symbolsPerHop must divide the frame length.');
 end

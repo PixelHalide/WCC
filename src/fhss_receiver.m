@@ -29,7 +29,7 @@ end
 p0 = numel(cfg.preambleBits);
 h0 = p0 + cfg.headerBits;
 payloadEnd = h0 + cfg.payloadBits;
-if numel(frameBits) >= cfg.frameBits
+if debug.valid && numel(frameBits) >= cfg.frameBits
     header = frameBits(p0+1:h0);
     payload = frameBits(h0+1:payloadEnd);
     receivedCrcBits = frameBits(payloadEnd+1:payloadEnd+cfg.crcBits);
@@ -47,7 +47,7 @@ else
     frameId = NaN;
 end
 
-frameSyncOk = parseValid && preambleMatches >= cfg.syncHardMatchThreshold;
+frameSyncOk = debug.valid && parseValid && preambleMatches >= cfg.syncHardMatchThreshold;
 if options.acquire
     syncSuccess = sync.success && frameSyncOk;
 else

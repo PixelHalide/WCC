@@ -2,7 +2,7 @@
 title: "FHSS Transceiver with Hop Synchronization and Partial-Band Interference"
 subtitle: "Wireless Communication Project Report"
 author: "Wireless Communication Class Project"
-date: "31 August 2026"
+date: "25 October 2026"
 toc: true
 numbersections: true
 header-includes:
@@ -25,7 +25,7 @@ The work addresses four objectives:
 
 1. Synthesize and visualize a reproducible framed FHSS waveform.
 2. Model AWGN and a configurable partial-band interferer.
-3. recover the payload through hop and frame synchronization, dehopping, BPSK demodulation, and CRC validation.
+3. Recover the payload through hop and frame synchronization, dehopping, BPSK demodulation, and CRC validation.
 4. Quantify BER/PER and make an engineering recommendation for hop-set size and hop rate.
 
 The implementation is a complex low-intermediate-frequency equivalent of a nominal 2.4 GHz radio. Directly sampling a 2.4 GHz carrier is unnecessary because frequency translation preserves the modulation and interference relationships being studied.
@@ -136,7 +136,7 @@ Deliberate impairment tests force a one-hop sequence offset or receiver dwell-ra
 
 The BER/PER grid uses $E_b/N_0=0:2:14$ dB, jammer occupancies of 0%, 12.5%, 25%, and 50%, and all three hop rates. Every operating point uses at least 250 packets and stops after 100 packet errors or 2,000 packets. Wilson 95% confidence intervals quantify Monte Carlo uncertainty.
 
-The complete sample-domain waveform is used for the aligned-link BER/PER grid, synchronization, code-phase error, and hop-rate mismatch. A fast symbol-domain model is retained for the fixed-frequency decision-level comparison. Selected operating points quantify the difference between that abstraction and the waveform model under asynchronous partial-band interference.
+The complete sample-domain waveform is used for the aligned-link BER/PER grid, synchronization, code-phase error, and hop-rate mismatch. The aligned grid supplies correct packet timing; acquisition is evaluated separately. A fast symbol-domain model is retained for the fixed-frequency decision-level comparison. Selected operating points quantify the difference between that abstraction and the waveform model under asynchronous partial-band interference.
 
 The fixed-frequency comparison preserves BPSK symbol rate and average transmit power. It includes fixed jammed and clean carriers and a fixed channel chosen uniformly per packet, preventing a single favorable carrier choice from being mistaken for general fixed-link performance.
 
@@ -158,10 +158,10 @@ The baseline at 10 dB used 1250 hops/s. Table 3 reports the measured payload BER
 
 | Jammer occupancy | BER | 95% BER interval | PER | 95% PER interval |
 |---:|---:|---:|---:|---:|
-| 0.0% | 3.906e-06 | [1.071e-06, 1.424e-05] | 0.0025 | [0.001068, 0.005839] |
-| 12.5% | 0.02744 | [0.0262, 0.02873] | 1 | [0.9849, 1] |
-| 25.0% | 0.05011 | [0.04845, 0.05183] | 1 | [0.9849, 1] |
-| 50.0% | 0.07344 | [0.07144, 0.07548] | 1 | [0.9849, 1] |
+| 0.0% | 1.953e-06 | [3.448e-07, 1.106e-05] | 0.0005 | [8.827e-05, 0.002827] |
+| 12.5% | 0.03706 | [0.03563, 0.03855] | 1 | [0.9849, 1] |
+| 25.0% | 0.05545 | [0.05371, 0.05725] | 1 | [0.9849, 1] |
+| 50.0% | 0.07328 | [0.07129, 0.07533] | 1 | [0.9849, 1] |
 
 The selection rule recommends an eight-channel hop set at **1250 hops/s**. Eight is the largest orthogonal set supported by the specified 195 kHz band and 25 kHz spacing. When rate candidates had overlapping 95% intervals, the rule selected the slower rate to reduce switching and synchronization complexity.
 
@@ -169,7 +169,7 @@ Table 4 compares FHSS with fixed-frequency alternatives at equal average transmi
 
 | Link | BER | PER | Packets |
 |:--|--:|--:|--:|
-| fhss | 0.05769 | 1 | 250 |
+| fhss | 0.06786 | 1 | 250 |
 | fixed jammed | 0.2661 | 1 | 250 |
 | fixed clean | 7.813e-06 | 0.002 | 2000 |
 | fixed random | 0.0685 | 0.2591 | 386 |
@@ -178,9 +178,9 @@ Table 5 contrasts forced one-hop misalignment with preamble-assisted acquisition
 
 | Hop rate | Forced-offset BER | Forced-offset PER | Acquired sync probability |
 |---:|---:|---:|---:|
-| 625 hops/s | 0.5025 | 1 | 0.500 |
-| 1250 hops/s | 0.4985 | 1 | 0.920 |
-| 2500 hops/s | 0.4875 | 1 | 0.900 |
+| 625 hops/s | 0.4932 | 1 | 0.720 |
+| 1250 hops/s | 0.4898 | 1 | 0.900 |
+| 2500 hops/s | 0.4936 | 1 | 0.920 |
 
 The symbol-domain and full-waveform BER confidence intervals overlapped in 1 of 3 validation cases. The jammer cases reveal the expected effect of asynchronous jammer symbol boundaries and adjacent-channel leakage. Accordingly, the main BER/PER grid, synchronization, and rate-mismatch results use the full sample-domain waveform; the symbol model is retained only for the fixed-link decision-level comparison.
 
@@ -204,8 +204,11 @@ The automated verification suite checks:
 - reproducible, balanced hop blocks;
 - exact noiseless payload recovery at every hop rate;
 - agreement with jammer-free theoretical BPSK BER;
-- high-SNR hop timing and code-phase acquisition; and
-- measurable degradation from a deliberate one-hop offset.
+- high-SNR hop timing and nonzero code-phase acquisition;
+- measurable degradation from a deliberate one-hop offset;
+- per-packet hop-seed handling and fixed-link equivalence;
+- rejection of truncated frames and invalid scenarios; and
+- accumulated fractional dwell boundaries and base-MATLAB dependencies.
 
 The experiment additionally records symbol/full-waveform confidence-interval overlap at selected operating points. Fixed and hopped links use the same BPSK power normalization.
 
@@ -213,12 +216,14 @@ The experiment additionally records symbol/full-waveform confidence-interval ove
 
 This is an idealized simulation. It excludes multipath fading, Doppler, independent symbol-clock error, nonlinear amplifiers, synthesizer settling time, carrier phase estimation, forward-error correction, and SDR hardware. Carrier phase and frequency are assumed known after correct dehopping. These exclusions isolate hopping synchronization and partial-band interference, which are the stated project objectives.
 
+The symbol model assumes ideal channel isolation and does not perform acquisition. Its interference results are an approximation, rather than a substitute for waveform measurements. BER Wilson intervals assume independent bit errors; jammer errors can cluster within hops, so those intervals are approximate. PER intervals treat packets as independent trials. Zero measured error rates are drawn at half an event divided by the trial count on logarithmic plots; the CSV tables retain the actual zero counts.
+
 # Reproduction
 
 From the project directory, run:
 
 ```bash
-/Applications/MATLAB_R2026a.app/bin/matlab -batcExplh "run_all"
+/Applications/MATLAB_R2026b.app/bin/matlab -batch "run_all;"
 zsh build_report.sh
 ```
 

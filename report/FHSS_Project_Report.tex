@@ -77,6 +77,8 @@
 \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
 \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
 \usepackage{longtable,booktabs,array}
+\usepackage{caption}
+\captionsetup[table]{skip=6pt}
 \newcounter{none} % for unnumbered tables
 \usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
@@ -84,9 +86,6 @@
 \makeatletter
 \patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
 \makeatother
-% Allow footnotes in longtable head/foot
-\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
-\makesavenoteenv{longtable}
 \usepackage{graphicx}
 \makeatletter
 \newsavebox\pandoc@box
@@ -136,7 +135,7 @@ Interference}
 \makeatother
 \subtitle{Wireless Communication Project Report}
 \author{Wireless Communication Class Project}
-\date{31 August 2026}
+\date{25 October 2026}
 
 \begin{document}
 \maketitle
@@ -171,7 +170,7 @@ The work addresses four objectives:
 \item
   Model AWGN and a configurable partial-band interferer.
 \item
-  recover the payload through hop and frame synchronization, dehopping,
+  Recover the payload through hop and frame synchronization, dehopping,
   BPSK demodulation, and CRC validation.
 \item
   Quantify BER/PER and make an engineering recommendation for hop-set
@@ -190,7 +189,9 @@ architecture}\label{transmitter-and-receiver-architecture}
 
 \begin{figure}
 \centering
-\includegraphics[width=0.96\linewidth,height=\textheight,keepaspectratio,alt={FHSS transmitter, channel, and receiver processing chain.}]{figures/tx_rx_block_diagram.png}
+\includegraphics[width=0.96\linewidth,height=\textheight,keepaspectratio,alt={FHSS
+transmitter, channel, and receiver processing
+chain.}]{figures/tx_rx_block_diagram.png}
 \caption{FHSS transmitter, channel, and receiver processing chain.}
 \end{figure}
 
@@ -231,9 +232,7 @@ no input/output reflection, and no final XOR. Its standard
 
 BPSK mapping is
 
-\[
-a_k = 1-2b_k,
-\]
+\[a_k = 1-2b_k,\]
 
 where \(b_k\in\{0,1\}\) and \(a_k\in\{+1,-1\}\). Rectangular pulse
 shaping gives 50 samples/symbol at \(R_s=10\) ksymbol/s and \(F_s=500\)
@@ -244,24 +243,18 @@ bandwidth}\label{hopping-design-and-bandwidth}
 
 The eight low-IF carrier offsets are
 
-\[
-[-87.5,-62.5,-37.5,-12.5,12.5,37.5,62.5,87.5]\ \text{kHz}.
-\]
+\[[-87.5,-62.5,-37.5,-12.5,12.5,37.5,62.5,87.5]\ \text{kHz}.\]
 
 They are separated by \(\Delta f=25\) kHz. Rectangular BPSK has an
 approximate null-to-null occupied width \(B_\text{ch}=2R_s=20\) kHz,
 leaving a 5 kHz separation margin. The total hopping bandwidth is
 
-\[
-B_\text{hop}=(N-1)\Delta f+B_\text{ch}
-            =(8-1)(25)+20=195\ \text{kHz}.
-\]
+\[B_\text{hop}=(N-1)\Delta f+B_\text{ch}
+            =(8-1)(25)+20=195\ \text{kHz}.\]
 
 For \(N_s\) symbols per hop,
 
-\[
-T_d=\frac{N_s}{R_s}, \qquad R_h=\frac{1}{T_d}=\frac{R_s}{N_s}.
-\]
+\[T_d=\frac{N_s}{R_s}, \qquad R_h=\frac{1}{T_d}=\frac{R_s}{N_s}.\]
 
 \begin{longtable}[]{@{}rrrr@{}}
 \caption{Hopping configurations}\label{tbl:hops}\tabularnewline
@@ -286,13 +279,16 @@ retaining a reproducible pseudo-random order.
 
 \begin{figure}
 \centering
-\includegraphics[width=0.88\linewidth,height=\textheight,keepaspectratio,alt={Baseline pseudo-random carrier sequence.}]{figures/hop_pattern.png}
+\includegraphics[width=0.88\linewidth,height=\textheight,keepaspectratio,alt={Baseline
+pseudo-random carrier sequence.}]{figures/hop_pattern.png}
 \caption{Baseline pseudo-random carrier sequence.}
 \end{figure}
 
 \begin{figure}
 \centering
-\includegraphics[width=0.92\linewidth,height=\textheight,keepaspectratio,alt={Real transmit waveform and instantaneous hop offset.}]{figures/transmit_waveform.png}
+\includegraphics[width=0.92\linewidth,height=\textheight,keepaspectratio,alt={Real
+transmit waveform and instantaneous hop
+offset.}]{figures/transmit_waveform.png}
 \caption{Real transmit waveform and instantaneous hop offset.}
 \end{figure}
 
@@ -302,18 +298,14 @@ Model}\label{channel-and-interference-model}
 Complex AWGN is scaled from \(E_b/N_0\). For unit BPSK amplitude and
 \(L\) samples/symbol, the complex sample-noise variance is
 
-\[
-\sigma_n^2=\frac{L}{10^{(E_b/N_0)_\text{dB}/10}},
-\]
+\[\sigma_n^2=\frac{L}{10^{(E_b/N_0)_\text{dB}/10}},\]
 
 which produces a real decision-noise variance of \(1/(2E_b/N_0)\) after
 integrate-and-dump detection. Without interference, the expected
 coherent BPSK result is
 
-\[
-P_b=Q\!\left(\sqrt{2E_b/N_0}\right)
-   =\frac{1}{2}\operatorname{erfc}\!\left(\sqrt{E_b/N_0}\right).
-\]
+\[P_b=Q\!\left(\sqrt{2E_b/N_0}\right)
+   =\frac{1}{2}\operatorname{erfc}\!\left(\sqrt{E_b/N_0}\right).\]
 
 The partial-band jammer occupies a contiguous central subset of the hop
 channels. Independent complex Gaussian symbols are rectangularly shaped
@@ -325,13 +317,17 @@ increase total jammer power.
 
 \begin{figure}
 \centering
-\includegraphics[width=0.96\linewidth,height=\textheight,keepaspectratio,alt={Transmit and received spectrograms for 25\% jammer occupancy.}]{figures/spectrograms.png}
+\includegraphics[width=0.96\linewidth,height=\textheight,keepaspectratio,alt={Transmit
+and received spectrograms for 25\% jammer
+occupancy.}]{figures/spectrograms.png}
 \caption{Transmit and received spectrograms for 25\% jammer occupancy.}
 \end{figure}
 
 \begin{figure}
 \centering
-\includegraphics[width=0.9\linewidth,height=\textheight,keepaspectratio,alt={Normalized transmit and received power spectra.}]{figures/transmit_receive_spectrum.png}
+\includegraphics[width=0.9\linewidth,height=\textheight,keepaspectratio,alt={Normalized
+transmit and received power
+spectra.}]{figures/transmit_receive_spectrum.png}
 \caption{Normalized transmit and received power spectra.}
 \end{figure}
 
@@ -348,10 +344,8 @@ For a candidate soft preamble vector \(\mathbf{y}\) and known bipolar
 preamble \(\mathbf{p}\), the acquisition metric is normalized
 correlation:
 
-\[
-M=\frac{\mathbf{y}^{T}\mathbf{p}}
-        {\sqrt{(\mathbf{y}^{T}\mathbf{y})(\mathbf{p}^{T}\mathbf{p})}}.
-\]
+\[M=\frac{\mathbf{y}^{T}\mathbf{p}}
+        {\sqrt{(\mathbf{y}^{T}\mathbf{y})(\mathbf{p}^{T}\mathbf{p})}}.\]
 
 Acquisition requires \(M\geq0.70\) and at least 28 of 32 correct hard
 preamble decisions. After dehopping, the receiver performs another
@@ -373,11 +367,12 @@ packets. Wilson 95\% confidence intervals quantify Monte Carlo
 uncertainty.
 
 The complete sample-domain waveform is used for the aligned-link BER/PER
-grid, synchronization, code-phase error, and hop-rate mismatch. A fast
-symbol-domain model is retained for the fixed-frequency decision-level
-comparison. Selected operating points quantify the difference between
-that abstraction and the waveform model under asynchronous partial-band
-interference.
+grid, synchronization, code-phase error, and hop-rate mismatch. The
+aligned grid supplies correct packet timing; acquisition is evaluated
+separately. A fast symbol-domain model is retained for the
+fixed-frequency decision-level comparison. Selected operating points
+quantify the difference between that abstraction and the waveform model
+under asynchronous partial-band interference.
 
 The fixed-frequency comparison preserves BPSK symbol rate and average
 transmit power. It includes fixed jammed and clean carriers and a fixed
@@ -388,27 +383,35 @@ carrier choice from being mistaken for general fixed-link performance.
 
 \begin{figure}
 \centering
-\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio,alt={BER across jammer occupancy and hop rate. The dashed reference is theoretical jammer-free BPSK.}]{figures/ber_occupancy_hoprate.png}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio,alt={BER
+across jammer occupancy and hop rate. The dashed reference is
+theoretical jammer-free BPSK.}]{figures/ber_occupancy_hoprate.png}
 \caption{BER across jammer occupancy and hop rate. The dashed reference
 is theoretical jammer-free BPSK.}
 \end{figure}
 
 \begin{figure}
 \centering
-\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio,alt={PER across jammer occupancy and hop rate.}]{figures/per_occupancy_hoprate.png}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio,alt={PER
+across jammer occupancy and hop
+rate.}]{figures/per_occupancy_hoprate.png}
 \caption{PER across jammer occupancy and hop rate.}
 \end{figure}
 
 \begin{figure}
 \centering
-\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio,alt={BER, PER, and synchronization sensitivity to receiver hop-rate mismatch.}]{figures/hop_rate_mismatch.png}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio,alt={BER,
+PER, and synchronization sensitivity to receiver hop-rate
+mismatch.}]{figures/hop_rate_mismatch.png}
 \caption{BER, PER, and synchronization sensitivity to receiver hop-rate
 mismatch.}
 \end{figure}
 
 \begin{figure}
 \centering
-\includegraphics[width=0.9\linewidth,height=\textheight,keepaspectratio,alt={FHSS and fixed-frequency BER at equal average transmit power.}]{figures/fhss_fixed_comparison.png}
+\includegraphics[width=0.9\linewidth,height=\textheight,keepaspectratio,alt={FHSS
+and fixed-frequency BER at equal average transmit
+power.}]{figures/fhss_fixed_comparison.png}
 \caption{FHSS and fixed-frequency BER at equal average transmit power.}
 \end{figure}
 
@@ -440,11 +443,11 @@ PER
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-0.0\% & 3.906e-06 & {[}1.071e-06, 1.424e-05{]} & 0.0025 & {[}0.001068,
-0.005839{]} \\
-12.5\% & 0.02744 & {[}0.0262, 0.02873{]} & 1 & {[}0.9849, 1{]} \\
-25.0\% & 0.05011 & {[}0.04845, 0.05183{]} & 1 & {[}0.9849, 1{]} \\
-50.0\% & 0.07344 & {[}0.07144, 0.07548{]} & 1 & {[}0.9849, 1{]} \\
+0.0\% & 1.953e-06 & {[}3.448e-07, 1.106e-05{]} & 0.0005 & {[}8.827e-05,
+0.002827{]} \\
+12.5\% & 0.03706 & {[}0.03563, 0.03855{]} & 1 & {[}0.9849, 1{]} \\
+25.0\% & 0.05545 & {[}0.05371, 0.05725{]} & 1 & {[}0.9849, 1{]} \\
+50.0\% & 0.07328 & {[}0.07129, 0.07533{]} & 1 & {[}0.9849, 1{]} \\
 \end{longtable}
 }
 
@@ -465,7 +468,7 @@ Link & BER & PER & Packets \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-fhss & 0.05769 & 1 & 250 \\
+fhss & 0.06786 & 1 & 250 \\
 fixed jammed & 0.2661 & 1 & 250 \\
 fixed clean & 7.813e-06 & 0.002 & 2000 \\
 fixed random & 0.0685 & 0.2591 & 386 \\
@@ -495,9 +498,9 @@ Acquired sync probability
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-625 hops/s & 0.5025 & 1 & 0.500 \\
-1250 hops/s & 0.4985 & 1 & 0.920 \\
-2500 hops/s & 0.4875 & 1 & 0.900 \\
+625 hops/s & 0.4932 & 1 & 0.720 \\
+1250 hops/s & 0.4898 & 1 & 0.900 \\
+2500 hops/s & 0.4936 & 1 & 0.920 \\
 \end{longtable}
 }
 
@@ -554,9 +557,15 @@ The automated verification suite checks:
 \item
   agreement with jammer-free theoretical BPSK BER;
 \item
-  high-SNR hop timing and code-phase acquisition; and
+  high-SNR hop timing and nonzero code-phase acquisition;
 \item
-  measurable degradation from a deliberate one-hop offset.
+  measurable degradation from a deliberate one-hop offset;
+\item
+  per-packet hop-seed handling and fixed-link equivalence;
+\item
+  rejection of truncated frames and invalid scenarios; and
+\item
+  accumulated fractional dwell boundaries and base-MATLAB dependencies.
 \end{itemize}
 
 The experiment additionally records symbol/full-waveform
@@ -572,13 +581,22 @@ SDR hardware. Carrier phase and frequency are assumed known after
 correct dehopping. These exclusions isolate hopping synchronization and
 partial-band interference, which are the stated project objectives.
 
+The symbol model assumes ideal channel isolation and does not perform
+acquisition. Its interference results are an approximation, rather than
+a substitute for waveform measurements. BER Wilson intervals assume
+independent bit errors; jammer errors can cluster within hops, so those
+intervals are approximate. PER intervals treat packets as independent
+trials. Zero measured error rates are drawn at half an event divided by
+the trial count on logarithmic plots; the CSV tables retain the actual
+zero counts.
+
 \section{Reproduction}\label{reproduction}
 
 From the project directory, run:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\ExtensionTok{/Applications/MATLAB\_R2026a.app/bin/matlab} \AttributeTok{{-}batcExplh} \StringTok{"run\_all"}
+\ExtensionTok{/Applications/MATLAB\_R2026b.app/bin/matlab} \AttributeTok{{-}batch} \StringTok{"run\_all;"}
 \FunctionTok{zsh}\NormalTok{ build\_report.sh}
 \end{Highlighting}
 \end{Shaded}

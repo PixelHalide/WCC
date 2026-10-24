@@ -22,16 +22,5 @@ for h = 1:nHops
         channelBySample(first:last) = hopIndices(h);
     end
 end
-if any(channelBySample == 0)
-    % Fill rare gaps caused by defensive rounding with the previous channel.
-    for k = 1:nSamples
-        if channelBySample(k) == 0
-            if k == 1
-                channelBySample(k) = hopIndices(1);
-            else
-                channelBySample(k) = channelBySample(k-1);
-            end
-        end
-    end
-end
+% Consecutive rounded boundaries share an endpoint: there are no gaps.
 end

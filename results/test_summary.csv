@@ -8,3 +8,7 @@ Hop acquisition,1,PASS
 Deliberate misalignment,1,PASS
 FHSS/fixed no-jammer equivalence,1,PASS
 Base-MATLAB dependency scan,1,PASS
+Packet hop seed,1,PASS
+Truncated frame rejection,1,PASS
+Fractional dwell boundaries,1,PASS
+Scenario validation,1,PASS

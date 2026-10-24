@@ -13,7 +13,7 @@ fprintf('Running fixed-frequency comparison...\n');
 fixed = run_fixed_comparison(cfg);
 fprintf('Cross-checking waveform and symbol models...\n');
 crosscheck = run_crosscheck(cfg);
-recommendation = choose_recommendation(performance);
+recommendation = choose_recommendation(performance, mismatch);
 results = struct('performance', performance, 'mismatch', mismatch, ...
     'fixed', fixed, 'crosscheck', crosscheck, ...
     'recommendation', recommendation, 'config', cfg);
@@ -38,7 +38,6 @@ for symbolsPerHop = cfg.experiment.symbolsPerHop
                 cfg.experiment.stopPacketErrors);
             berCI = wilson_interval(stats.bitErrors, stats.bits);
             perCI = wilson_interval(stats.packetErrors, stats.packets);
-            syncCI = wilson_interval(stats.syncFailures, stats.packets);
             rows(end+1,:) = {symbolsPerHop, dwell_ms(cfg, symbolsPerHop), ...
                 hop_rate(cfg, symbolsPerHop), occupancy, ebNoDb, cfg.defaultJsDb, ...
                 stats.packets, stats.bits, stats.bitErrors, stats.ber, ...
@@ -169,10 +168,13 @@ stats.ber = stats.bitErrors/stats.bits;
 stats.per = stats.packetErrors/stats.packets;
 end
 
-function recommendation = choose_recommendation(performance)
+function recommendation = choose_recommendation(performance, mismatch)
 target = performance(performance.EbNoDb == 10 & performance.Occupancy == 0.25, :);
-bestSync = max(target.SyncProbability);
-eligible = target(target.SyncProbability >= bestSync - 0.05, :);
+% Use actual acquisition trials, not preamble detection with known timing.
+acquired = mismatch(strcmp(mismatch.Study, 'Acquired'), :);
+bestSync = max(acquired.SyncProbability);
+eligibleRates = acquired.HopRateHz(acquired.SyncProbability >= bestSync - 0.05);
+eligible = target(ismember(target.HopRateHz, eligibleRates), :);
 rates = unique(eligible.HopRateHz);
 summary = zeros(numel(rates), 4);
 for k = 1:numel(rates)
