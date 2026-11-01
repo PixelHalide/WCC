@@ -4,7 +4,7 @@ projectRoot = fileparts(mfilename('fullpath'));
 originalFolder = pwd;
 cleanup = onCleanup(@() cd(originalFolder));
 cd(projectRoot);
-addpath(fullfile(projectRoot,'src'));
+addpath(genpath(fullfile(projectRoot,'src')));
 addpath(fullfile(projectRoot,'tests'));
 cfg = fhss_config();
 run_tests();

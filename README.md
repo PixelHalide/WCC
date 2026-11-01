@@ -63,6 +63,10 @@ The final file is `report/FHSS_Project_Report.pdf`.
 
 ## Main interfaces
 
+The entry points load every source subfolder automatically. For direct function
+calls in a fresh MATLAB session, first run `addpath(genpath('src'))` from the
+project root.
+
 ```matlab
 cfg = fhss_config();
 out = simulate_packet(cfg, scenario, "waveform");
@@ -73,6 +77,26 @@ run_all;
 Use `mode="waveform"` for physical hopping, timing acquisition, and hop-rate mismatch. The faster `mode="symbol"` assumes ideal channel isolation and does not perform timing acquisition; it is only an approximate decision-level comparison. Its jammer results do not match the waveform model's asynchronous pulses and adjacent-channel leakage.
 
 Important `scenario` fields are `symbolsPerHop`, `ebNoDb`, `jammerOccupancy`, `jsDb`, `codeOffset`, `txCodeOffset`, `hopSeed`, `rateError`, `acquire`, and `linkType`. `txCodeOffset` injects the transmitter phase that acquisition must recover; `codeOffset` forces the receiver phase when acquisition is disabled. Waveform mode supports FHSS; symbol mode also supports `fixed_jammed`, `fixed_clean`, and `fixed_random`.
+
+## Source layout
+
+```text
+run_all.m                  Full verification, experiments, plots and report data
+run_quick.m                Tests and one baseline packet
+src/
+  config/                  Shared settings and validation
+  transmitter/             Framing and BPSK waveform synthesis
+  hopping/                 Shared hop sequence and sample-level carrier schedule
+  channel/                 AWGN and partial-band jammer
+  receiver/                Acquisition, dehopping, decisions and frame parsing
+  analysis/                Packet simulation, experiment loops and statistics
+  plotting/                FFT helpers, plots, styling and figure export
+  utilities/               Bit conversions and CRC-16
+  reporting/               Report generation from measured results
+tests/                     Deterministic verification suite
+```
+
+Function names and simulation behaviour are unchanged by the folder split.
 
 ## Output map
 
