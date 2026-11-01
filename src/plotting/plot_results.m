@@ -1,5 +1,5 @@
 function plot_results(cfg, results)
-%PLOT_RESULTS Export BER/PER, mismatch, and fixed-link comparison curves.
+%PLOT_RESULTS Export BER/PER and fixed-link comparison curves.
 performance = results.performance;
 occupancies = unique(performance.Occupancy).';
 rates = unique(performance.HopRateHz).';
@@ -48,20 +48,21 @@ for r = 1:numel(rates)
     rows = mismatch(mismatch.HopRateHz == rates(r),:);
     plot(rows.RateErrorPercent, rows.BER, '-o','LineWidth',1.2);
 end
-grid on; xlabel('Rate error (%)'); ylabel('BER'); ylim([0 0.45]); title('Payload BER');
+grid on; xlabel('Receiver dwell error (%)'); ylabel('BER'); ylim([0 max(0.01, 1.1*max(mismatch.BER))]); title('Payload BER');
 subplot(1,3,2); hold on;
 for r = 1:numel(rates)
     rows = mismatch(mismatch.HopRateHz == rates(r),:);
     plot(rows.RateErrorPercent, rows.PER, '-o','LineWidth',1.2);
 end
-grid on; xlabel('Rate error (%)'); ylabel('PER'); ylim([0 1.05]); title('Packet error rate');
+grid on; xlabel('Receiver dwell error (%)'); ylabel('PER'); ylim([0 1.05]); title('Packet error rate');
 subplot(1,3,3); hold on;
 for r = 1:numel(rates)
     rows = mismatch(mismatch.HopRateHz == rates(r),:);
     plot(rows.RateErrorPercent, rows.SyncProbability, '-o','LineWidth',1.2);
 end
-grid on; xlabel('Rate error (%)'); ylabel('Probability'); ylim([0 1.05]);
+grid on; xlabel('Receiver dwell error (%)'); ylabel('Probability'); ylim([0 1.05]);
 title('Frame synchronization');
+sgtitle(sprintf('E_b/N_0 = 10 dB, occupancy = 25%%, J/S = %.1f dB', cfg.defaultJsDb), 'Color', 'k');
 legend(arrayfun(@(x) sprintf('%.0f hops/s',x),rates,'UniformOutput',false), ...
     'Location','best');
 export_figure_pair(fig, cfg.figureRoot, 'hop_rate_mismatch');

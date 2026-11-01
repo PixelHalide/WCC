@@ -17,7 +17,7 @@ header-includes:
 
 # Abstract
 
-This project designs and evaluates a frequency-hopping spread-spectrum (FHSS) transceiver in base MATLAB. A framed BPSK payload is transmitted over eight pseudo-random carrier offsets while a jammer occupies only part of the hopping band. The receiver performs preamble-assisted hop timing and hopping-code acquisition, dehopping, coherent BPSK detection, frame synchronization, and CRC-16 checking. Reliability is measured using payload bit error rate (BER), packet error rate (PER), and synchronization probability. Experiments vary jammer occupancy, hop rate, hopping mismatch, and receiver dwell-rate error, then compare FHSS with an equal-power fixed-frequency BPSK link. The complete experiment is deterministic and requires no MATLAB toolboxes.
+This project designs and evaluates a frequency-hopping spread-spectrum (FHSS) transceiver in base MATLAB. A framed BPSK payload is transmitted over eight pseudo-random carrier offsets while a jammer occupies only part of the hopping band. The receiver performs preamble-assisted hop timing and hopping-code acquisition, dehopping, coherent BPSK detection, frame synchronization, and CRC-16 checking. Reliability is measured using payload bit error rate (BER), packet error rate (PER), and synchronization probability. Experiments vary jammer occupancy, hop rate, hopping-code mismatch, and receiver dwell-rate mismatch, then compare FHSS with an equal-power fixed-frequency BPSK link. The complete experiment is deterministic and requires no MATLAB toolboxes.
 
 # Objectives
 
@@ -111,7 +111,7 @@ P_b=Q\!\left(\sqrt{2E_b/N_0}\right)
    =\frac{1}{2}\operatorname{erfc}\!\left(\sqrt{E_b/N_0}\right).
 $$
 
-The partial-band jammer occupies a contiguous central subset of the hop channels. Independent complex Gaussian symbols are rectangularly shaped and translated to every occupied jammer channel. Aggregate jammer power is fixed at $J/S=10$ dB and divided equally between occupied channels. Consequently, increasing occupancy changes both the probability of a hop collision and jammer power per occupied channel; it does not silently increase total jammer power.
+The partial-band jammer occupies a contiguous central subset of the hop channels. Independent complex Gaussian symbols are rectangularly shaped and translated to every occupied jammer channel. Aggregate jammer power is fixed at $J/S=-10$ dB and divided equally between occupied channels. Consequently, increasing occupancy changes both the probability of a hop collision and jammer power per occupied channel; it does not silently increase total jammer power.
 
 ![Transmit and received spectrograms for 25% jammer occupancy.](figures/spectrograms.png){width=96%}
 
@@ -136,7 +136,9 @@ Deliberate impairment tests force a one-hop sequence offset or receiver dwell-ra
 
 The BER/PER grid uses $E_b/N_0=0:2:14$ dB, jammer occupancies of 0%, 12.5%, 25%, and 50%, and all three hop rates. Every operating point uses at least 250 packets and stops after 100 packet errors or 2,000 packets. Wilson 95% confidence intervals quantify Monte Carlo uncertainty.
 
-The complete sample-domain waveform is used for the aligned-link BER/PER grid, synchronization, code-phase error, and hop-rate mismatch. The aligned grid supplies correct packet timing; acquisition is evaluated separately. A fast symbol-domain model is retained for the fixed-frequency decision-level comparison. Selected operating points quantify the difference between that abstraction and the waveform model under asynchronous partial-band interference.
+The aligned-link grid assumes matched hop rates. The mismatch study varies receiver dwell duration from -0.5% to +0.5%, with finer steps near zero, using 200 packets per point at $E_b/N_0=10$ dB, 25% occupancy and $J/S=-10$ dB. It supplies packet timing and code phase; frame synchronization here is not blind acquisition. Acquisition is evaluated separately using 50 packets per hop rate.
+
+The complete sample-domain waveform is used for the aligned-link BER/PER grid, synchronization, code-phase error and hop-rate mismatch. The aligned grid supplies correct packet timing; acquisition is evaluated separately. A fast symbol-domain model is retained for the fixed-frequency decision-level comparison. Selected operating points quantify the difference between that abstraction and the waveform model under asynchronous partial-band interference.
 
 The fixed-frequency comparison preserves BPSK symbol rate and average transmit power. It includes fixed jammed and clean carriers and a fixed channel chosen uniformly per packet, preventing a single favorable carrier choice from being mistaken for general fixed-link performance.
 
@@ -146,7 +148,8 @@ The fixed-frequency comparison preserves BPSK symbol rate and average transmit p
 
 ![PER across jammer occupancy and hop rate.](figures/per_occupancy_hoprate.png){width=100%}
 
-![BER, PER, and synchronization sensitivity to receiver hop-rate mismatch.](figures/hop_rate_mismatch.png){width=100%}
+
+![BER, PER and frame synchronization versus receiver dwell-duration mismatch.](figures/hop_rate_mismatch.png){width=100%}
 
 ![FHSS and fixed-frequency BER at equal average transmit power.](figures/fhss_fixed_comparison.png){width=90%}
 
@@ -158,7 +161,7 @@ The fixed-frequency comparison preserves BPSK symbol rate and average transmit p
 
 The occupancy curves must be interpreted with the jammer normalization in mind. A narrow jammer concentrates the fixed total power into fewer channels, producing severe but less frequent hop collisions. A wider jammer collides with more hops but has less power in each occupied channel. PER is often more sensitive than BER because a single corrupted payload or CRC bit rejects the entire frame.
 
-Matched hop-rate changes do not necessarily create a large BER improvement in an ideal instantaneous-switching channel. Its main value is the time scale over which interference errors are distributed. By contrast, receiver rate mismatch accumulates boundary error across the packet and eventually applies the wrong dehopping carrier, explaining the rapid PER increase away from zero mismatch.
+Receiver dwell mismatch accumulates timing error across the packet, so frame detection can succeed even when later bits are corrupted. Matched hop-rate changes do not necessarily create a large BER improvement in an ideal instantaneous-switching channel. Its main value is the time scale over which interference errors are distributed.
 
 # Engineering Recommendation
 

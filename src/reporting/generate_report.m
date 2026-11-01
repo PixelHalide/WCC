@@ -46,6 +46,19 @@ for k = 1:height(fixed)
         strrep(fixed.LinkType{k},'_',' '),fixed.BER(k),fixed.PER(k),fixed.Packets(k));
 end
 
+rateStudy = results.mismatch(strcmp(results.mismatch.Study,'Rate mismatch'),:);
+parts{end+1} = sprintf('\nThe dwell mismatch study measures packet errors over 200 packets per point. The following selected points use supplied timing and code phase.\n\n');
+parts{end+1} = sprintf('| Hop rate | Dwell error | Packet errors / packets | PER |\n|---:|---:|---:|---:|\n');
+for rate = unique(rateStudy.HopRateHz).'
+    for errorPercent = [-0.1 0 0.1]
+        row = rateStudy(rateStudy.HopRateHz == rate & abs(rateStudy.RateErrorPercent-errorPercent) < 1e-9,:);
+        if ~isempty(row)
+            parts{end+1} = sprintf('| %.0f hops/s | %+.1f%% | %d / %d | %.3f |\n', ...
+                rate, errorPercent, row.PacketErrors(1), row.Packets(1), row.PER(1));
+        end
+    end
+end
+
 offset = results.mismatch(strcmp(results.mismatch.Study,'One-hop offset'),:);
 acquired = results.mismatch(strcmp(results.mismatch.Study,'Acquired'),:);
 parts{end+1} = sprintf('\nTable 5 contrasts forced one-hop misalignment with preamble-assisted acquisition.\n\n');
@@ -60,7 +73,7 @@ overlapCount = sum(results.crosscheck.IntervalsOverlap);
 parts{end+1} = sprintf(['\nThe symbol-domain and full-waveform BER confidence intervals overlapped ' ...
     'in %d of %d validation cases. The jammer cases reveal the expected effect ' ...
     'of asynchronous jammer symbol boundaries and adjacent-channel leakage. ' ...
-    'Accordingly, the main BER/PER grid, synchronization, and rate-mismatch ' ...
+    'Accordingly, the main BER/PER grid, mismatch, and synchronization ' ...
     'results use the full sample-domain waveform; the symbol model is retained ' ...
     'only for the fixed-link decision-level comparison.\n'],overlapCount,height(results.crosscheck));
 text = [parts{:}];

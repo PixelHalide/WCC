@@ -17,7 +17,7 @@ writetable(testSummary,fullfile(cfg.outputRoot,'test_summary.csv'));
 
 fprintf('FHSS project: baseline waveform evidence\n');
 demoScenario = struct('frameId',1,'symbolsPerHop',8,'ebNoDb',10, ...
-    'jammerOccupancy',0.25,'jsDb',10,'acquire',true);
+    'jammerOccupancy',cfg.defaultJammerOccupancy,'jsDb',cfg.defaultJsDb,'acquire',true);
 demo = simulate_packet(cfg,demoScenario,'waveform');
 % A jammed demonstration is allowed to fail acquisition; record the outcome.
 save(fullfile(cfg.outputRoot,'baseline_demo.mat'),'demo','-v7');
