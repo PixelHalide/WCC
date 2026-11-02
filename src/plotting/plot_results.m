@@ -48,19 +48,19 @@ for r = 1:numel(rates)
     rows = mismatch(mismatch.HopRateHz == rates(r),:);
     plot(rows.RateErrorPercent, rows.BER, '-o','LineWidth',1.2);
 end
-grid on; xlabel('Receiver dwell error (%)'); ylabel('BER'); ylim([0 max(0.01, 1.1*max(mismatch.BER))]); title('Payload BER');
+grid on; xlabel('Receiver hop chip time error (%)'); ylabel('BER'); ylim([0 max(0.01, 1.1*max(mismatch.BER))]); title('Payload BER');
 subplot(1,3,2); hold on;
 for r = 1:numel(rates)
     rows = mismatch(mismatch.HopRateHz == rates(r),:);
     plot(rows.RateErrorPercent, rows.PER, '-o','LineWidth',1.2);
 end
-grid on; xlabel('Receiver dwell error (%)'); ylabel('PER'); ylim([0 1.05]); title('Packet error rate');
+grid on; xlabel('Receiver hop chip time error (%)'); ylabel('PER'); ylim([0 1.05]); title('Packet error rate');
 subplot(1,3,3); hold on;
 for r = 1:numel(rates)
     rows = mismatch(mismatch.HopRateHz == rates(r),:);
     plot(rows.RateErrorPercent, rows.SyncProbability, '-o','LineWidth',1.2);
 end
-grid on; xlabel('Receiver dwell error (%)'); ylabel('Probability'); ylim([0 1.05]);
+grid on; xlabel('Receiver hop chip time error (%)'); ylabel('Probability'); ylim([0 1.05]);
 title('Frame synchronization');
 sgtitle(sprintf('E_b/N_0 = 10 dB, occupancy = 25%%, J/S = %.1f dB', cfg.defaultJsDb), 'Color', 'k');
 legend(arrayfun(@(x) sprintf('%.0f hops/s',x),rates,'UniformOutput',false), ...

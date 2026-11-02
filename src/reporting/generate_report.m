@@ -47,8 +47,8 @@ for k = 1:height(fixed)
 end
 
 rateStudy = results.mismatch(strcmp(results.mismatch.Study,'Rate mismatch'),:);
-parts{end+1} = sprintf('\nThe dwell mismatch study measures packet errors over 200 packets per point. The following selected points use supplied timing and code phase.\n\n');
-parts{end+1} = sprintf('| Hop rate | Dwell error | Packet errors / packets | PER |\n|---:|---:|---:|---:|\n');
+parts{end+1} = sprintf('\nThe hop-chip-time mismatch study measures packet errors over 200 packets per point. The following selected points use supplied timing and code phase.\n\n');
+parts{end+1} = sprintf('| Hop rate | Hop chip time error | Packet errors / packets | PER |\n|---:|---:|---:|---:|\n');
 for rate = unique(rateStudy.HopRateHz).'
     for errorPercent = [-0.1 0 0.1]
         row = rateStudy(rateStudy.HopRateHz == rate & abs(rateStudy.RateErrorPercent-errorPercent) < 1e-9,:);

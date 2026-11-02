@@ -17,7 +17,7 @@ header-includes:
 
 # Abstract
 
-This project designs and evaluates a frequency-hopping spread-spectrum (FHSS) transceiver in base MATLAB. A framed BPSK payload is transmitted over eight pseudo-random carrier offsets while a jammer occupies only part of the hopping band. The receiver performs preamble-assisted hop timing and hopping-code acquisition, dehopping, coherent BPSK detection, frame synchronization, and CRC-16 checking. Reliability is measured using payload bit error rate (BER), packet error rate (PER), and synchronization probability. Experiments vary jammer occupancy, hop rate, hopping-code mismatch, and receiver dwell-rate mismatch, then compare FHSS with an equal-power fixed-frequency BPSK link. The complete experiment is deterministic and requires no MATLAB toolboxes.
+This project designs and evaluates a frequency-hopping spread-spectrum (FHSS) transceiver in base MATLAB. A framed BPSK payload is transmitted over eight pseudo-random carrier offsets while a jammer occupies only part of the hopping band. The receiver performs preamble-assisted hop timing and hopping-code acquisition, dehopping, coherent BPSK detection, frame synchronization, and CRC-16 checking. Reliability is measured using payload bit error rate (BER), packet error rate (PER), and synchronization probability. Experiments vary jammer occupancy, hop rate, hopping-code mismatch, and receiver hop-chip-time mismatch, then compare FHSS with an equal-power fixed-frequency BPSK link. The complete experiment is deterministic and requires no MATLAB toolboxes.
 
 # Objectives
 
@@ -36,7 +36,7 @@ The implementation is a complex low-intermediate-frequency equivalent of a nomin
 
 ![FHSS transmitter, channel, and receiver processing chain.](figures/tx_rx_block_diagram.png){width=96%}
 
-The transmitter appends a fixed synchronization word and CRC to each payload, maps the bits to BPSK symbols, and mixes each dwell interval to a carrier selected by a shared pseudo-random generator. The receiver evaluates timing and hopping-code candidates with the known preamble, reconstructs the winning carrier schedule, dehops the samples, and uses integrate-and-dump symbol decisions. A frame is accepted only if preamble detection and CRC validation succeed.
+The transmitter appends a fixed synchronization word and CRC to each payload, maps the bits to BPSK symbols, and mixes each hop-chip interval to a carrier selected by a shared pseudo-random generator. The receiver evaluates timing and hopping-code candidates with the known preamble, reconstructs the winning carrier schedule, dehops the samples, and uses integrate-and-dump symbol decisions. A frame is accepted only if preamble detection and CRC validation succeed.
 
 ## Frame and modulation
 
@@ -76,13 +76,13 @@ B_\text{hop}=(N-1)\Delta f+B_\text{ch}
             =(8-1)(25)+20=195\ \text{kHz}.
 $$
 
-For $N_s$ symbols per hop,
+Here, a **hop chip** is one interval spent on a single hop frequency. Its duration, $T_\mathrm{hc}$, is also called the hop dwell time. It is not a BPSK symbol time: each hop chip contains $N_s$ BPSK symbols. For $N_s$ symbols per hop,
 
 $$
-T_d=\frac{N_s}{R_s}, \qquad R_h=\frac{1}{T_d}=\frac{R_s}{N_s}.
+T_\mathrm{hc}=\frac{N_s}{R_s}, \qquad R_h=\frac{1}{T_\mathrm{hc}}=\frac{R_s}{N_s}.
 $$
 
-| Symbols/hop | Dwell time | Hop rate | Hops/frame |
+| Symbols/hop | Hop chip time | Hop rate | Hops/frame |
 |---:|---:|---:|---:|
 | 16 | 1.6 ms | 625 hops/s | 20 |
 | 8 | 0.8 ms | 1,250 hops/s | 40 |
@@ -98,17 +98,17 @@ The hopping generator uses a fixed Mersenne Twister seed. Successive random perm
 
 # Channel and Interference Model
 
-Complex AWGN is scaled from $E_b/N_0$. For unit BPSK amplitude and $L$ samples/symbol, the complex sample-noise variance is
+Let $\gamma_b=E_b/N_0$ denote the **linear** energy-per-bit to noise-density ratio. Its decibel representation is $(E_b/N_0)_\text{dB}=10\log_{10}(\gamma_b)$. For unit BPSK amplitude and $L$ samples/symbol, the complex AWGN sample-noise variance is
 
 $$
-\sigma_n^2=\frac{L}{10^{(E_b/N_0)_\text{dB}/10}},
+\sigma_n^2=\frac{L}{\gamma_b}.
 $$
 
-which produces a real decision-noise variance of $1/(2E_b/N_0)$ after integrate-and-dump detection. Without interference, the expected coherent BPSK result is
+This produces a real decision-noise variance of $1/(2\gamma_b)$ after integrate-and-dump detection. Without interference, the expected coherent BPSK result is
 
 $$
-P_b=Q\!\left(\sqrt{2E_b/N_0}\right)
-   =\frac{1}{2}\operatorname{erfc}\!\left(\sqrt{E_b/N_0}\right).
+P_b=Q\!\left(\sqrt{2\gamma_b}\right)
+   =\frac{1}{2}\operatorname{erfc}\!\left(\sqrt{\gamma_b}\right).
 $$
 
 The partial-band jammer occupies a contiguous central subset of the hop channels. Independent complex Gaussian symbols are rectangularly shaped and translated to every occupied jammer channel. Aggregate jammer power is fixed at $J/S=-10$ dB and divided equally between occupied channels. Consequently, increasing occupancy changes both the probability of a hop collision and jammer power per occupied channel; it does not silently increase total jammer power.
@@ -119,7 +119,7 @@ The partial-band jammer occupies a contiguous central subset of the hop channels
 
 # Receiver Synchronization
 
-The receiver knows the hop set, seed, symbol rate, and nominal dwell duration but not the exact packet boundary or hopping-code phase. It searches code offsets from $-8$ through $+8$ hops and evaluates every sample timing within one dwell. The exhaustive timing search avoids carrier-dependent phase ambiguity that can make a symbol-spaced coarse search select the wrong refinement region.
+The receiver knows the hop set, seed, symbol rate, and nominal hop chip time but not the exact packet boundary or hopping-code phase. It searches code offsets from $-8$ through $+8$ hops and evaluates every sample timing within one hop chip. The exhaustive timing search avoids carrier-dependent phase ambiguity that can make a symbol-spaced coarse search select the wrong refinement region.
 
 For a candidate soft preamble vector $\mathbf{y}$ and known bipolar preamble $\mathbf{p}$, the acquisition metric is normalized correlation:
 
@@ -130,13 +130,13 @@ $$
 
 Acquisition requires $M\geq0.70$ and at least 28 of 32 correct hard preamble decisions. After dehopping, the receiver performs another Hamming-distance preamble search, extracts the frame, and verifies CRC. A synchronization failure or CRC failure counts as a packet error. BER is calculated only from the 256 payload bits.
 
-Deliberate impairment tests force a one-hop sequence offset or receiver dwell-rate errors from $-2\%$ through $+2\%$. Fractional receiver hop boundaries are accumulated before rounding so that the implementation does not add a systematic per-hop rounding bias.
+Deliberate impairment tests force a one-hop sequence offset or receiver hop-chip-time errors from $-0.5\%$ through $+0.5\%$. Fractional receiver hop boundaries are accumulated before rounding so that the implementation does not add a systematic per-hop rounding bias.
 
 # Experiment Method
 
 The BER/PER grid uses $E_b/N_0=0:2:14$ dB, jammer occupancies of 0%, 12.5%, 25%, and 50%, and all three hop rates. Every operating point uses at least 250 packets and stops after 100 packet errors or 2,000 packets. Wilson 95% confidence intervals quantify Monte Carlo uncertainty.
 
-The aligned-link grid assumes matched hop rates. The mismatch study varies receiver dwell duration from -0.5% to +0.5%, with finer steps near zero, using 200 packets per point at $E_b/N_0=10$ dB, 25% occupancy and $J/S=-10$ dB. It supplies packet timing and code phase; frame synchronization here is not blind acquisition. Acquisition is evaluated separately using 50 packets per hop rate.
+The aligned-link grid assumes matched hop rates. The mismatch study varies receiver hop chip time from -0.5% to +0.5%, with finer steps near zero, using 200 packets per point at $E_b/N_0=10$ dB, 25% occupancy and $J/S=-10$ dB. It supplies packet timing and code phase; frame synchronization here is not blind acquisition. Acquisition is evaluated separately using 50 packets per hop rate.
 
 The complete sample-domain waveform is used for the aligned-link BER/PER grid, synchronization, code-phase error and hop-rate mismatch. The aligned grid supplies correct packet timing; acquisition is evaluated separately. A fast symbol-domain model is retained for the fixed-frequency decision-level comparison. Selected operating points quantify the difference between that abstraction and the waveform model under asynchronous partial-band interference.
 
@@ -149,7 +149,7 @@ The fixed-frequency comparison preserves BPSK symbol rate and average transmit p
 ![PER across jammer occupancy and hop rate.](figures/per_occupancy_hoprate.png){width=100%}
 
 
-![BER, PER and frame synchronization versus receiver dwell-duration mismatch.](figures/hop_rate_mismatch.png){width=100%}
+![BER, PER and frame synchronization versus receiver hop-chip-time mismatch.](figures/hop_rate_mismatch.png){width=100%}
 
 ![FHSS and fixed-frequency BER at equal average transmit power.](figures/fhss_fixed_comparison.png){width=90%}
 
@@ -177,9 +177,9 @@ Table 4 compares FHSS with fixed-frequency alternatives at equal average transmi
 | fixed clean | 7.813e-06 | 0.002 | 2000 |
 | fixed random | 3.32e-05 | 0.0105 | 2000 |
 
-The dwell mismatch study measures packet errors over 200 packets per point. The following selected points use supplied timing and code phase.
+The hop-chip-time mismatch study measures packet errors over 200 packets per point. The following selected points use supplied timing and code phase.
 
-| Hop rate | Dwell error | Packet errors / packets | PER |
+| Hop rate | Hop chip time error | Packet errors / packets | PER |
 |---:|---:|---:|---:|
 | 625 hops/s | -0.1% | 6 / 200 | 0.030 |
 | 625 hops/s | +0.0% | 1 / 200 | 0.005 |
@@ -204,7 +204,7 @@ The symbol-domain and full-waveform BER confidence intervals overlapped in 3 of 
 
 The occupancy curves must be interpreted with the jammer normalization in mind. A narrow jammer concentrates the fixed total power into fewer channels, producing severe but less frequent hop collisions. A wider jammer collides with more hops but has less power in each occupied channel. PER is often more sensitive than BER because a single corrupted payload or CRC bit rejects the entire frame.
 
-Receiver dwell mismatch accumulates timing error across the packet, so frame detection can succeed even when later bits are corrupted. Matched hop-rate changes do not necessarily create a large BER improvement in an ideal instantaneous-switching channel. Its main value is the time scale over which interference errors are distributed.
+Receiver hop-chip-time mismatch accumulates timing error across the packet, so frame detection can succeed even when later bits are corrupted. Matched hop-rate changes do not necessarily create a large BER improvement in an ideal instantaneous-switching channel. Its main value is the time scale over which interference errors are distributed.
 
 # Engineering Recommendation
 
@@ -225,7 +225,7 @@ The automated verification suite checks:
 - measurable degradation from a deliberate one-hop offset;
 - per-packet hop-seed handling and fixed-link equivalence;
 - rejection of truncated frames and invalid scenarios; and
-- accumulated fractional dwell boundaries and base-MATLAB dependencies.
+- accumulated fractional hop boundaries and base-MATLAB dependencies.
 
 The experiment additionally records symbol/full-waveform confidence-interval overlap at selected operating points. Fixed and hopped links use the same BPSK power normalization.
 
