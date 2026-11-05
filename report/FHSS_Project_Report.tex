@@ -534,15 +534,16 @@ Hop rate & Offset BER & Offset PER & Acquired sync & Acquired PER \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-625 hops/s & 0.4961 & 1 & 1.000 & 0.220 \\
-1250 hops/s & 0.491 & 1 & 1.000 & 0.020 \\
+625 hops/s & 0.4961 & 1 & 0.980 & 0.200 \\
+1250 hops/s & 0.491 & 1 & 1.000 & 0.000 \\
 2500 hops/s & 0.4941 & 1 & 1.000 & 0.000 \\
 \end{longtable}
 }
 
-The acquisition columns use 50 packets per rate in a separate
-zero-mismatch experiment; the forced-offset columns use 200 packets per
-rate. Acquired synchronization records passing the preamble checks and
+The acquisition columns use the same 50 packets per rate as the
+zero-mismatch point of the frame-synchronization graph; the forced-offset
+columns use 200 packets per rate in a separate experiment.
+Acquired synchronization records passing the preamble checks and
 can accept a wrong hopping-code phase. Acquired PER includes CRC
 failures and therefore exposes payload failures hidden by that
 synchronization metric.
@@ -583,7 +584,7 @@ of the best observed value, then choose the lowest known-timing PER at
 an engineering heuristic, not a statistical equivalence test.
 Overlapping confidence intervals do not establish equal performance.
 
-In the current measurements, acquired PER is 22\%, 2\%, and 0\% at 625,
+In the current measurements, acquired PER is 20\%, 0\%, and 0\% at 625,
 1250, and 2500 hops/s, respectively, using only 50 packets per rate. The
 32-bit preamble spans two, four, and eight hops, respectively. At 625
 hops/s, distinct code positions can share the first two channels,

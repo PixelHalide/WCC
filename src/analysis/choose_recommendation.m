@@ -1,7 +1,11 @@
 function recommendation = choose_recommendation(performance, mismatch)
 %CHOOSE_RECOMMENDATION Provisional choice using acquired packet reliability.
 target = performance(performance.EbNoDb == 10 & performance.Occupancy == 0.25,:);
-acquired = mismatch(strcmp(mismatch.Study,'Acquired'),:);
+acquired = mismatch(strcmp(mismatch.Study,'Rate mismatch acquired') & ...
+    mismatch.RateErrorPercent == 0,:);
+if isempty(acquired)
+    error('fhss:RecommendationData','Zero-mismatch acquisition sweep is required.');
+end
 % Preamble success alone can accept an incorrect hopping-code alignment.
 % This five-percentage-point tolerance is an engineering screening heuristic,
 % not a statistical equivalence test on the small acquisition sample.
