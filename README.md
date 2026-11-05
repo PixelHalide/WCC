@@ -78,6 +78,8 @@ Use `mode="waveform"` for physical hopping, and timing acquisition. The faster `
 
 Important `scenario` fields are `symbolsPerHop`, `ebNoDb`, `jammerOccupancy`, `jsDb`, `codeOffset`, `txCodeOffset`, `hopSeed`, `rateError`, `acquire`, and `linkType`. `txCodeOffset` injects the transmitter phase that acquisition must recover; `codeOffset` forces the receiver phase when acquisition is disabled. Waveform mode supports FHSS; symbol mode also supports `fixed_jammed`, `fixed_clean`, and `fixed_random`.
 
+Acquisition defaults to `false`. BER/PER studies use known packet timing and hop alignment (apart from deliberately imposed mismatch). The frame-synchronization panel uses a separate `acquire = true` mismatch sweep with 50 packets per point; BER/PER panels use 200 packets per point with `acquire = false`. The first 50 trials use matching seeds between these two cases at each setting. Explicit acquisition tests also enable it. Symbol mode does not perform acquisition. Rerun `run_all` and `zsh build_report.sh` to regenerate results and the report after changing experiment settings.
+
 ## Source layout
 
 ```text

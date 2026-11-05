@@ -47,7 +47,7 @@ for k = 1:height(fixed)
 end
 
 rateStudy = results.mismatch(strcmp(results.mismatch.Study,'Rate mismatch'),:);
-parts{end+1} = sprintf('\nThe hop-chip-time mismatch study measures packet errors over 200 packets per point. The following selected points use supplied timing and code phase.\n\n');
+parts{end+1} = sprintf('\nThe hop-chip-time mismatch BER/PER study uses 200 packets per point with acquisition disabled and supplied timing and initial code phase. The frame-synchronization panel uses a separate acquisition-enabled sweep with 50 packets per point.\n\n');
 parts{end+1} = sprintf('| Hop rate | Hop chip time error | Packet errors / packets | PER |\n|---:|---:|---:|---:|\n');
 for rate = unique(rateStudy.HopRateHz).'
     for errorPercent = [-0.1 0 0.1]

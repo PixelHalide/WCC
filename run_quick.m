@@ -9,7 +9,7 @@ addpath(fullfile(projectRoot,'tests'));
 cfg = fhss_config();
 run_tests();
 demo = simulate_packet(cfg,struct('frameId',1,'ebNoDb',10, ...
-    'jammerOccupancy',0.25,'acquire',true),'waveform');
+    'jammerOccupancy',0.25,'acquire',false),'waveform');
 fprintf('BER %.4g, CRC %d, synchronization %d, metric %.3f\n', ...
     demo.ber,demo.crcOk,demo.syncSuccess,demo.receiver.sync.metric);
 clear cleanup;

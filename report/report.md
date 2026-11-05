@@ -136,9 +136,9 @@ Deliberate impairment tests force a one-hop sequence offset or receiver hop-chip
 
 The BER/PER grid uses $E_b/N_0=0:2:14$ dB, jammer occupancies of 0%, 12.5%, 25%, and 50%, and all three hop rates. Every operating point uses at least 250 packets and stops after 100 packet errors or 2,000 packets. Wilson 95% confidence intervals quantify Monte Carlo uncertainty.
 
-The aligned-link grid assumes matched hop rates. The mismatch study varies receiver hop chip time from -0.5% to +0.5%, with finer steps near zero, using 200 packets per point at $E_b/N_0=10$ dB, 25% occupancy and $J/S=-10$ dB. It supplies packet timing and code phase; frame synchronization here is not blind acquisition. Acquisition is evaluated separately using 50 packets per hop rate.
+The aligned-link grid assumes matched hop rates. The mismatch study varies receiver hop chip time from -0.5% to +0.5%, with finer steps near zero, at $E_b/N_0=10$ dB, 25% occupancy and $J/S=-10$ dB. BER/PER use 200 packets per point with acquisition disabled and packet timing and initial hop alignment supplied. The frame-synchronization panel uses a separate acquisition-enabled sweep with 50 packets per point, sharing the first 50 packet seeds with the BER/PER case at each setting. Acquisition searches at the nominal hop duration and does not estimate or correct hop-duration error. An additional zero-mismatch acquisition study uses 50 packets per hop rate.
 
-The complete sample-domain waveform is used for the aligned-link BER/PER grid, synchronization, code-phase error and hop-rate mismatch. The aligned grid supplies correct packet timing; acquisition is evaluated separately. A fast symbol-domain model is retained for the fixed-frequency decision-level comparison. Selected operating points quantify the difference between that abstraction and the waveform model under asynchronous partial-band interference.
+The complete sample-domain waveform is used for the aligned-link BER/PER grid, synchronization, code-phase error and hop-rate mismatch. Acquisition is disabled for the aligned-link grid and deliberate one-hop offset study; this preserves the imposed misalignment in the latter. A fast symbol-domain model is retained for the fixed-frequency decision-level comparison. Selected operating points compare that abstraction with the waveform model using known timing to isolate channel-model differences.
 
 The fixed-frequency comparison preserves BPSK symbol rate and average transmit power. It includes fixed jammed and clean carriers and a fixed channel chosen uniformly per packet, preventing a single favorable carrier choice from being mistaken for general fixed-link performance.
 
@@ -149,7 +149,7 @@ The fixed-frequency comparison preserves BPSK symbol rate and average transmit p
 ![PER across jammer occupancy and hop rate.](figures/per_occupancy_hoprate.png){width=100%}
 
 
-![BER, PER and frame synchronization versus receiver hop-chip-time mismatch.](figures/hop_rate_mismatch.png){width=100%}
+![Receiver hop-chip-time mismatch: BER/PER with acquisition disabled; frame synchronization with acquisition enabled.](figures/hop_rate_mismatch.png){width=100%}
 
 ![FHSS and fixed-frequency BER at equal average transmit power.](figures/fhss_fixed_comparison.png){width=90%}
 
@@ -177,7 +177,7 @@ Table 4 compares FHSS with fixed-frequency alternatives at equal average transmi
 | fixed clean | 7.813e-06 | 0.002 | 2000 |
 | fixed random | 3.32e-05 | 0.0105 | 2000 |
 
-The hop-chip-time mismatch study measures packet errors over 200 packets per point. The following selected points use supplied timing and code phase.
+The hop-chip-time mismatch BER/PER study uses 200 packets per point with acquisition disabled and supplied timing and initial code phase. The frame-synchronization panel uses a separate acquisition-enabled sweep with 50 packets per point.
 
 | Hop rate | Hop chip time error | Packet errors / packets | PER |
 |---:|---:|---:|---:|
@@ -212,23 +212,6 @@ Use all eight orthogonal channels available in the specified 195 kHz band. A jam
 
 The reported hop-rate recommendation is selected automatically from the measurements: first exclude rates whose synchronization probability is more than five percentage points below the best; then minimize mean PER at 10 dB and 25% occupancy; if 95% intervals overlap, select the slower rate to reduce switching and synchronization complexity. This rule makes the recommendation reproducible instead of choosing the most visually attractive curve.
 
-# Validation
-
-The automated verification suite checks:
-
-- the CRC `123456789` reference value;
-- complete frame length and field placement;
-- reproducible, balanced hop blocks;
-- exact noiseless payload recovery at every hop rate;
-- agreement with jammer-free theoretical BPSK BER;
-- high-SNR hop timing and nonzero code-phase acquisition;
-- measurable degradation from a deliberate one-hop offset;
-- per-packet hop-seed handling and fixed-link equivalence;
-- rejection of truncated frames and invalid scenarios; and
-- accumulated fractional hop boundaries and base-MATLAB dependencies.
-
-The experiment additionally records symbol/full-waveform confidence-interval overlap at selected operating points. Fixed and hopped links use the same BPSK power normalization.
-
 # Limitations
 
 This is an idealized simulation. It excludes multipath fading, Doppler, independent symbol-clock error, nonlinear amplifiers, synthesizer settling time, carrier phase estimation, forward-error correction, and SDR hardware. Carrier phase and frequency are assumed known after correct dehopping. These exclusions isolate hopping synchronization and partial-band interference, which are the stated project objectives.
@@ -245,10 +228,3 @@ zsh build_report.sh
 ```
 
 `run_all` performs deterministic tests, writes CSV/MAT evidence, exports every figure as PNG and vector PDF, and fills this report with measured values. All random processes use stored seeds.
-
-# References
-
-1. R. C. Dixon, *Spread Spectrum Systems with Commercial Applications*, 3rd ed., Wiley, 1994.
-2. J. G. Proakis and M. Salehi, *Digital Communications*, 5th ed., McGraw-Hill, 2008.
-3. MathWorks, “MATLAB System Requirements for Mac,” <https://www.mathworks.com/support/requirements/matlab-mac.html>.
-4. MathWorks, “Download and Install MATLAB,” <https://www.mathworks.com/help/install/ug/install-products-with-internet-connection.html>.

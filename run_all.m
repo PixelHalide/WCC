@@ -17,9 +17,9 @@ writetable(testSummary,fullfile(cfg.outputRoot,'test_summary.csv'));
 
 fprintf('FHSS project: baseline waveform evidence\n');
 demoScenario = struct('frameId',1,'symbolsPerHop',8,'ebNoDb',10, ...
-    'jammerOccupancy',cfg.defaultJammerOccupancy,'jsDb',cfg.defaultJsDb,'acquire',true);
+    'jammerOccupancy',cfg.defaultJammerOccupancy,'jsDb',cfg.defaultJsDb,'acquire',false);
 demo = simulate_packet(cfg,demoScenario,'waveform');
-% A jammed demonstration is allowed to fail acquisition; record the outcome.
+% Baseline waveform evidence uses known packet timing and hop alignment.
 save(fullfile(cfg.outputRoot,'baseline_demo.mat'),'demo','-v7');
 plot_demo(cfg,demo);
 

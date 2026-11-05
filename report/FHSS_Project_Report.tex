@@ -373,18 +373,23 @@ uncertainty.
 
 The aligned-link grid assumes matched hop rates. The mismatch study
 varies receiver hop chip time from -0.5\% to +0.5\%, with finer steps
-near zero, using 200 packets per point at \(E_b/N_0=10\) dB, 25\%
-occupancy and \(J/S=-10\) dB. It supplies packet timing and code phase;
-frame synchronization here is not blind acquisition. Acquisition is
-evaluated separately using 50 packets per hop rate.
+near zero, at \(E_b/N_0=10\) dB, 25\% occupancy and \(J/S=-10\) dB.
+BER/PER use 200 packets per point with acquisition disabled and packet
+timing and initial hop alignment supplied. The frame-synchronization
+panel uses a separate acquisition-enabled sweep with 50 packets per
+point, sharing the first 50 packet seeds with the BER/PER case at each
+setting. Acquisition searches at the nominal hop duration and does not
+estimate or correct hop-duration error. An additional zero-mismatch
+acquisition study uses 50 packets per hop rate.
 
 The complete sample-domain waveform is used for the aligned-link BER/PER
-grid, synchronization, code-phase error and hop-rate mismatch. The
-aligned grid supplies correct packet timing; acquisition is evaluated
-separately. A fast symbol-domain model is retained for the
-fixed-frequency decision-level comparison. Selected operating points
-quantify the difference between that abstraction and the waveform model
-under asynchronous partial-band interference.
+grid, synchronization, code-phase error and hop-rate mismatch.
+Acquisition is disabled for the aligned-link grid and deliberate one-hop
+offset study; this preserves the imposed misalignment in the latter. A
+fast symbol-domain model is retained for the fixed-frequency
+decision-level comparison. Selected operating points compare that
+abstraction with the waveform model using known timing to isolate
+channel-model differences.
 
 The fixed-frequency comparison preserves BPSK symbol rate and average
 transmit power. It includes fixed jammed and clean carriers and a fixed
@@ -412,11 +417,12 @@ rate.}]{figures/per_occupancy_hoprate.png}
 
 \begin{figure}
 \centering
-\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio,alt={BER,
-PER and frame synchronization versus receiver hop-chip-time
-mismatch.}]{figures/hop_rate_mismatch.png}
-\caption{BER, PER and frame synchronization versus receiver
-hop-chip-time mismatch.}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio,alt={Receiver
+hop-chip-time mismatch: BER/PER with acquisition disabled; frame
+synchronization with acquisition
+enabled.}]{figures/hop_rate_mismatch.png}
+\caption{Receiver hop-chip-time mismatch: BER/PER with acquisition
+disabled; frame synchronization with acquisition enabled.}
 \end{figure}
 
 \begin{figure}
@@ -490,9 +496,10 @@ fixed random & 3.32e-05 & 0.0105 & 2000 \\
 \end{longtable}
 }
 
-The hop-chip-time mismatch study measures packet errors over 200 packets
-per point. The following selected points use supplied timing and code
-phase.
+The hop-chip-time mismatch BER/PER study uses 200 packets per point with
+acquisition disabled and supplied timing and initial code phase. The
+frame-synchronization panel uses a separate acquisition-enabled sweep
+with 50 packets per point.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}rrrr@{}}
@@ -578,38 +585,6 @@ slower rate to reduce switching and synchronization complexity. This
 rule makes the recommendation reproducible instead of choosing the most
 visually attractive curve.
 
-\section{Validation}\label{validation}
-
-The automated verification suite checks:
-
-\begin{itemize}
-\tightlist
-\item
-  the CRC \texttt{123456789} reference value;
-\item
-  complete frame length and field placement;
-\item
-  reproducible, balanced hop blocks;
-\item
-  exact noiseless payload recovery at every hop rate;
-\item
-  agreement with jammer-free theoretical BPSK BER;
-\item
-  high-SNR hop timing and nonzero code-phase acquisition;
-\item
-  measurable degradation from a deliberate one-hop offset;
-\item
-  per-packet hop-seed handling and fixed-link equivalence;
-\item
-  rejection of truncated frames and invalid scenarios; and
-\item
-  accumulated fractional hop boundaries and base-MATLAB dependencies.
-\end{itemize}
-
-The experiment additionally records symbol/full-waveform
-confidence-interval overlap at selected operating points. Fixed and
-hopped links use the same BPSK power normalization.
-
 \section{Limitations}\label{limitations}
 
 This is an idealized simulation. It excludes multipath fading, Doppler,
@@ -642,24 +617,5 @@ From the project directory, run:
 \texttt{run\_all} performs deterministic tests, writes CSV/MAT evidence,
 exports every figure as PNG and vector PDF, and fills this report with
 measured values. All random processes use stored seeds.
-
-\section{References}\label{references}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  R. C. Dixon, \emph{Spread Spectrum Systems with Commercial
-  Applications}, 3rd ed., Wiley, 1994.
-\item
-  J. G. Proakis and M. Salehi, \emph{Digital Communications}, 5th ed.,
-  McGraw-Hill, 2008.
-\item
-  MathWorks, ``MATLAB System Requirements for Mac,''
-  \url{https://www.mathworks.com/support/requirements/matlab-mac.html}.
-\item
-  MathWorks, ``Download and Install MATLAB,''
-  \url{https://www.mathworks.com/help/install/ug/install-products-with-internet-connection.html}.
-\end{enumerate}
 
 \end{document}

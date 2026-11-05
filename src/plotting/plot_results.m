@@ -42,6 +42,11 @@ legend(arrayfun(@(x) sprintf('Occupancy %.1f%%',100*x),occupancies,'UniformOutpu
 export_figure_pair(fig, cfg.figureRoot, 'per_occupancy_hoprate');
 
 mismatch = results.mismatch(strcmp(results.mismatch.Study,'Rate mismatch'),:);
+syncMismatch = results.mismatch(strcmp(results.mismatch.Study,'Rate mismatch acquired'),:);
+if isempty(syncMismatch)
+    error('fhss:MissingAcquisitionStudy', ...
+        'Acquisition-enabled mismatch results are missing. Rerun run_all.');
+end
 fig = figure('Visible','off','Color','w','Position',[100 100 1200 440]);
 subplot(1,3,1); hold on;
 for r = 1:numel(rates)
@@ -57,7 +62,7 @@ end
 grid on; xlabel('Receiver hop chip time error (%)'); ylabel('PER'); ylim([0 1.05]); title('Packet error rate');
 subplot(1,3,3); hold on;
 for r = 1:numel(rates)
-    rows = mismatch(mismatch.HopRateHz == rates(r),:);
+    rows = syncMismatch(syncMismatch.HopRateHz == rates(r),:);
     plot(rows.RateErrorPercent, rows.SyncProbability, '-o','LineWidth',1.2);
 end
 grid on; xlabel('Receiver hop chip time error (%)'); ylabel('Probability'); ylim([0 1.05]);
