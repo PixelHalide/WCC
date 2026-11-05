@@ -111,7 +111,7 @@ P_b=Q\!\left(\sqrt{2\gamma_b}\right)
    =\frac{1}{2}\operatorname{erfc}\!\left(\sqrt{\gamma_b}\right).
 $$
 
-The partial-band jammer occupies a contiguous central subset of the hop channels. Independent complex Gaussian symbols are rectangularly shaped and translated to every occupied jammer channel. Aggregate jammer power is fixed at $J/S=-10$ dB and divided equally between occupied channels. Consequently, increasing occupancy changes both the probability of a hop collision and jammer power per occupied channel; it does not silently increase total jammer power.
+The partial-band jammer occupies a contiguous central subset of the hop channels. Independent complex Gaussian symbols are rectangularly shaped and translated to every occupied jammer channel. Aggregate jammer power is fixed at $J/S=-5$ dB and divided equally between occupied channels. Consequently, increasing occupancy changes both the probability of a hop collision and jammer power per occupied channel; it does not silently increase total jammer power.
 
 ![Transmit and received spectrograms for 25% jammer occupancy.](figures/spectrograms.png){width=96%}
 
@@ -136,7 +136,7 @@ Deliberate impairment tests force a one-hop sequence offset or receiver hop-chip
 
 The BER/PER grid uses $E_b/N_0=0:2:14$ dB, jammer occupancies of 0%, 12.5%, 25%, and 50%, and all three hop rates. Every operating point uses at least 250 packets and stops after 100 packet errors or 2,000 packets. Wilson 95% confidence intervals quantify Monte Carlo uncertainty.
 
-The aligned-link grid assumes matched hop rates. The mismatch study varies receiver hop chip time from -0.5% to +0.5%, with finer steps near zero, at $E_b/N_0=10$ dB, 25% occupancy and $J/S=-10$ dB. BER/PER use 200 packets per point with acquisition disabled and packet timing and initial hop alignment supplied. The frame-synchronization panel uses a separate acquisition-enabled sweep with 50 packets per point, sharing the first 50 packet seeds with the BER/PER case at each setting. Acquisition searches at the nominal hop duration and does not estimate or correct hop-duration error. The table and engineering recommendation reuse the zero-mismatch acquisition trials from this sweep, so their synchronization probabilities match the graph exactly.
+The aligned-link grid assumes matched hop rates. The mismatch study varies receiver hop chip time from -0.5% to +0.5%, with finer steps near zero, at $E_b/N_0=10$ dB, 25% occupancy and $J/S=-5$ dB. BER/PER use 1,000 packets per point with acquisition disabled and packet timing and initial hop alignment supplied. The frame-synchronization panel uses a separate acquisition-enabled sweep with 50 packets per point, sharing the first 50 packet seeds with the BER/PER case at each setting. Acquisition searches at the nominal hop duration and does not estimate or correct hop-duration error. The table and engineering recommendation reuse the zero-mismatch acquisition trials from this sweep, so their synchronization probabilities match the graph exactly.
 
 The complete sample-domain waveform is used for the aligned-link BER/PER grid, synchronization, code-phase error and hop-rate mismatch. Acquisition is disabled for the aligned-link grid and deliberate one-hop offset study; this preserves the imposed misalignment in the latter. A fast symbol-domain model is retained for the fixed-frequency decision-level comparison. Selected operating points compare that abstraction with the waveform model using known timing to isolate channel-model differences.
 
@@ -162,9 +162,9 @@ The baseline at 10 dB used 1250 hops/s. Table 3 reports the measured payload BER
 | Jammer occupancy | BER | 95% BER interval | PER | 95% PER interval |
 |---:|---:|---:|---:|---:|
 | 0.0% | 1.953e-06 | [3.448e-07, 1.106e-05] | 0.0005 | [8.827e-05, 0.002827] |
-| 12.5% | 3.516e-05 | [2.224e-05, 5.558e-05] | 0.0095 | [0.00609, 0.01479] |
-| 25.0% | 1.367e-05 | [6.623e-06, 2.822e-05] | 0.004 | [0.002028, 0.007873] |
-| 50.0% | 1.953e-05 | [1.061e-05, 3.596e-05] | 0.005 | [0.002718, 0.00918] |
+| 12.5% | 0.0006938 | [0.0005705, 0.0008437] | 0.1776 | [0.1483, 0.2113] |
+| 25.0% | 0.0002832 | [0.000232, 0.0003458] | 0.07553 | [0.06249, 0.09102] |
+| 50.0% | 0.0001074 | [8.254e-05, 0.0001398] | 0.0295 | [0.02294, 0.03787] |
 
 The provisional engineering recommendation is an eight-channel hop set at **1250 hops/s**, corresponding to **0.80 ms per hop**. The eight configured channels occupy a nominal 195 kHz span with 25 kHz spacing. The rate selection considers acquired packet errors as well as known-timing performance; preamble recognition alone does not establish correct hop alignment. Larger acquisition-enabled trials are needed to confirm the choice.
 
@@ -172,34 +172,34 @@ Table 4 compares FHSS with fixed-frequency alternatives at equal average transmi
 
 | Link | BER | PER | Packets |
 |:--|--:|--:|--:|
-| fhss | 4.688e-05 | 0.0125 | 2000 |
-| fixed jammed | 0.0001211 | 0.0325 | 2000 |
+| fhss | 0.0007963 | 0.2146 | 466 |
+| fixed jammed | 0.002469 | 0.512 | 250 |
 | fixed clean | 7.813e-06 | 0.002 | 2000 |
-| fixed random | 3.32e-05 | 0.0105 | 2000 |
+| fixed random | 0.0007011 | 0.1425 | 702 |
 
-The hop-chip-time mismatch BER/PER study uses 200 packets per point with acquisition disabled and supplied timing and initial code phase. The frame-synchronization panel uses a separate acquisition-enabled sweep with 50 packets per point.
+The hop-chip-time mismatch BER/PER study uses 1,000 packets per point with acquisition disabled and supplied timing and initial code phase. The frame-synchronization panel uses a separate acquisition-enabled sweep with 50 packets per point.
 
 | Hop rate | Hop chip time error | Packet errors / packets | PER |
 |---:|---:|---:|---:|
-| 625 hops/s | -0.1% | 6 / 200 | 0.030 |
-| 625 hops/s | +0.0% | 1 / 200 | 0.005 |
-| 625 hops/s | +0.1% | 4 / 200 | 0.020 |
-| 1250 hops/s | -0.1% | 6 / 200 | 0.030 |
-| 1250 hops/s | +0.0% | 0 / 200 | 0.000 |
-| 1250 hops/s | +0.1% | 6 / 200 | 0.030 |
-| 2500 hops/s | -0.1% | 10 / 200 | 0.050 |
-| 2500 hops/s | +0.0% | 0 / 200 | 0.000 |
-| 2500 hops/s | +0.1% | 5 / 200 | 0.025 |
+| 625 hops/s | -0.1% | 107 / 1000 | 0.107 |
+| 625 hops/s | +0.0% | 73 / 1000 | 0.073 |
+| 625 hops/s | +0.1% | 93 / 1000 | 0.093 |
+| 1250 hops/s | -0.1% | 117 / 1000 | 0.117 |
+| 1250 hops/s | +0.0% | 67 / 1000 | 0.067 |
+| 1250 hops/s | +0.1% | 105 / 1000 | 0.105 |
+| 2500 hops/s | -0.1% | 143 / 1000 | 0.143 |
+| 2500 hops/s | +0.0% | 84 / 1000 | 0.084 |
+| 2500 hops/s | +0.1% | 131 / 1000 | 0.131 |
 
 Table 5 contrasts forced one-hop misalignment with preamble-assisted acquisition.
 
 | Hop rate | Offset BER | Offset PER | Acquired sync | Acquired PER |
 |---:|---:|---:|---:|---:|
-| 625 hops/s | 0.4961 | 1 | 0.980 | 0.200 |
-| 1250 hops/s | 0.491 | 1 | 1.000 | 0.000 |
-| 2500 hops/s | 0.4941 | 1 | 1.000 | 0.000 |
+| 625 hops/s | 0.4944 | 1 | 0.960 | 0.180 |
+| 1250 hops/s | 0.4922 | 1 | 1.000 | 0.040 |
+| 2500 hops/s | 0.4933 | 1 | 1.000 | 0.100 |
 
-The acquisition columns use the same 50 packets per rate as the zero-mismatch point of the frame-synchronization graph; the forced-offset columns use 200 packets per rate in a separate experiment. Acquired synchronization records passing the preamble checks and can accept a wrong hopping-code phase. Acquired PER includes CRC failures and therefore exposes payload failures hidden by that synchronization metric.
+The acquisition columns use the same 50 packets per rate as the zero-mismatch point of the frame-synchronization graph; the forced-offset columns use 1,000 packets per rate in a separate experiment. Acquired synchronization records passing the preamble checks and can accept a wrong hopping-code phase. Acquired PER includes CRC failures and therefore exposes payload failures hidden by that synchronization metric.
 
 The symbol-domain and full-waveform BER confidence intervals overlapped in 3 of 3 validation cases. The jammer cases reveal the expected effect of asynchronous jammer symbol boundaries and adjacent-channel leakage. Accordingly, the main BER/PER grid, mismatch, and synchronization results use the full sample-domain waveform; the symbol model is retained only for the fixed-link decision-level comparison.
 
@@ -214,7 +214,7 @@ Use all eight configured hopping channels within the nominal 195 kHz span. With 
 
 The provisional rate reported in Results and Analysis is selected by screening acquired packet error rate, rather than preamble recognition alone. Retain rates whose acquired PER is within five percentage points of the best observed value, then choose the lowest known-timing PER at 10 dB and 25% jammer occupancy. The five-percentage-point tolerance is an engineering heuristic, not a statistical equivalence test. Overlapping confidence intervals do not establish equal performance.
 
-In the current measurements, acquired PER is 20%, 0%, and 0% at 625, 1250, and 2500 hops/s, respectively, using only 50 packets per rate. The 32-bit preamble spans two, four, and eight hops, respectively. At 625 hops/s, distinct code positions can share the first two channels, causing a wrong alignment to pass the preamble checks. The zero observed failures at 2500 hops/s do not establish superiority over 1250 hops/s. More acquisition-enabled packets and a preamble or candidate-checking method that resolves ambiguous hop alignment are needed before a final design choice. Hardware switching cost and synthesizer settling are not modeled.
+The acquired PER values in Table 5 use only 50 packets per rate. The 32-bit preamble spans two, four, and eight hops at 625, 1250, and 2500 hops/s, respectively. At 625 hops/s, distinct code positions can share the first two channels, causing a wrong alignment to pass the preamble checks. Jamming can also corrupt the preamble and payload. The provisional ranking does not establish that any rate achieves an acceptable packet error rate. More acquisition-enabled packets and a preamble or candidate-checking method that resolves ambiguous hop alignment are needed before a final design choice. Hardware switching cost and synthesizer settling are not modeled.
 
 # Limitations
 

@@ -59,7 +59,8 @@ for r = 1:numel(rates)
     rows = mismatch(mismatch.HopRateHz == rates(r),:);
     plot(rows.RateErrorPercent, rows.PER, '-o','LineWidth',1.2);
 end
-grid on; xlabel('Receiver hop chip time error (%)'); ylabel('PER'); ylim([0 1.05]); title('Packet error rate');
+grid on; xlabel('Receiver hop chip time error (%)'); ylabel('PER');
+set(gca,'YLimMode','auto','YLimitMethod','padded'); title('Packet error rate');
 subplot(1,3,3); hold on;
 for r = 1:numel(rates)
     rows = syncMismatch(syncMismatch.HopRateHz == rates(r),:);
