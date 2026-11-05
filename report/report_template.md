@@ -165,9 +165,11 @@ Receiver hop-chip-time mismatch accumulates timing error across the packet, so f
 
 # Engineering Recommendation
 
-Use all eight orthogonal channels available in the specified 195 kHz band. A jammer occupying a fixed number of channels then affects a smaller fraction of the hop set than it would with an unnecessarily restricted set.
+Use all eight configured hopping channels within the nominal 195 kHz span. With a fixed number of jammed channels, using more available channels reduces the fraction of the hop set directly affected. This choice applies to the specified channel plan; other hop-set sizes were not experimentally optimized.
 
-The reported hop-rate recommendation is selected automatically from the measurements: first exclude rates whose synchronization probability is more than five percentage points below the best; then minimize mean PER at 10 dB and 25% occupancy; if 95% intervals overlap, select the slower rate to reduce switching and synchronization complexity. This rule makes the recommendation reproducible instead of choosing the most visually attractive curve.
+The provisional rate reported in Results and Analysis is selected by screening acquired packet error rate, rather than preamble recognition alone. Retain rates whose acquired PER is within five percentage points of the best observed value, then choose the lowest known-timing PER at 10 dB and 25% jammer occupancy. The five-percentage-point tolerance is an engineering heuristic, not a statistical equivalence test. Overlapping confidence intervals do not establish equal performance.
+
+In the current measurements, acquired PER is 22%, 2%, and 0% at 625, 1250, and 2500 hops/s, respectively, using only 50 packets per rate. The 32-bit preamble spans two, four, and eight hops, respectively. At 625 hops/s, distinct code positions can share the first two channels, causing a wrong alignment to pass the preamble checks. The zero observed failures at 2500 hops/s do not establish superiority over 1250 hops/s. More acquisition-enabled packets and a preamble or candidate-checking method that resolves ambiguous hop alignment are needed before a final design choice. Hardware switching cost and synthesizer settling are not modeled.
 
 # Limitations
 

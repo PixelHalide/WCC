@@ -166,7 +166,7 @@ The baseline at 10 dB used 1250 hops/s. Table 3 reports the measured payload BER
 | 25.0% | 1.367e-05 | [6.623e-06, 2.822e-05] | 0.004 | [0.002028, 0.007873] |
 | 50.0% | 1.953e-05 | [1.061e-05, 3.596e-05] | 0.005 | [0.002718, 0.00918] |
 
-The selection rule recommends an eight-channel hop set at **625 hops/s**. Eight is the largest orthogonal set supported by the specified 195 kHz band and 25 kHz spacing. When rate candidates had overlapping 95% intervals, the rule selected the slower rate to reduce switching and synchronization complexity.
+The provisional engineering recommendation is an eight-channel hop set at **1250 hops/s**, corresponding to **0.80 ms per hop**. The eight configured channels occupy a nominal 195 kHz span with 25 kHz spacing. The rate selection considers acquired packet errors as well as known-timing performance; preamble recognition alone does not establish correct hop alignment. Larger acquisition-enabled trials are needed to confirm the choice.
 
 Table 4 compares FHSS with fixed-frequency alternatives at equal average transmit power.
 
@@ -193,11 +193,13 @@ The hop-chip-time mismatch BER/PER study uses 200 packets per point with acquisi
 
 Table 5 contrasts forced one-hop misalignment with preamble-assisted acquisition.
 
-| Hop rate | Forced-offset BER | Forced-offset PER | Acquired sync probability |
-|---:|---:|---:|---:|
-| 625 hops/s | 0.4961 | 1 | 1.000 |
-| 1250 hops/s | 0.491 | 1 | 1.000 |
-| 2500 hops/s | 0.4941 | 1 | 1.000 |
+| Hop rate | Offset BER | Offset PER | Acquired sync | Acquired PER |
+|---:|---:|---:|---:|---:|
+| 625 hops/s | 0.4961 | 1 | 1.000 | 0.220 |
+| 1250 hops/s | 0.491 | 1 | 1.000 | 0.020 |
+| 2500 hops/s | 0.4941 | 1 | 1.000 | 0.000 |
+
+The acquisition columns use 50 packets per rate in a separate zero-mismatch experiment; the forced-offset columns use 200 packets per rate. Acquired synchronization records passing the preamble checks and can accept a wrong hopping-code phase. Acquired PER includes CRC failures and therefore exposes payload failures hidden by that synchronization metric.
 
 The symbol-domain and full-waveform BER confidence intervals overlapped in 3 of 3 validation cases. The jammer cases reveal the expected effect of asynchronous jammer symbol boundaries and adjacent-channel leakage. Accordingly, the main BER/PER grid, mismatch, and synchronization results use the full sample-domain waveform; the symbol model is retained only for the fixed-link decision-level comparison.
 
@@ -208,9 +210,11 @@ Receiver hop-chip-time mismatch accumulates timing error across the packet, so f
 
 # Engineering Recommendation
 
-Use all eight orthogonal channels available in the specified 195 kHz band. A jammer occupying a fixed number of channels then affects a smaller fraction of the hop set than it would with an unnecessarily restricted set.
+Use all eight configured hopping channels within the nominal 195 kHz span. With a fixed number of jammed channels, using more available channels reduces the fraction of the hop set directly affected. This choice applies to the specified channel plan; other hop-set sizes were not experimentally optimized.
 
-The reported hop-rate recommendation is selected automatically from the measurements: first exclude rates whose synchronization probability is more than five percentage points below the best; then minimize mean PER at 10 dB and 25% occupancy; if 95% intervals overlap, select the slower rate to reduce switching and synchronization complexity. This rule makes the recommendation reproducible instead of choosing the most visually attractive curve.
+The provisional rate reported in Results and Analysis is selected by screening acquired packet error rate, rather than preamble recognition alone. Retain rates whose acquired PER is within five percentage points of the best observed value, then choose the lowest known-timing PER at 10 dB and 25% jammer occupancy. The five-percentage-point tolerance is an engineering heuristic, not a statistical equivalence test. Overlapping confidence intervals do not establish equal performance.
+
+In the current measurements, acquired PER is 22%, 2%, and 0% at 625, 1250, and 2500 hops/s, respectively, using only 50 packets per rate. The 32-bit preamble spans two, four, and eight hops, respectively. At 625 hops/s, distinct code positions can share the first two channels, causing a wrong alignment to pass the preamble checks. The zero observed failures at 2500 hops/s do not establish superiority over 1250 hops/s. More acquisition-enabled packets and a preamble or candidate-checking method that resolves ambiguous hop alignment are needed before a final design choice. Hardware switching cost and synthesizer settling are not modeled.
 
 # Limitations
 

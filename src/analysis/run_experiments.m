@@ -175,29 +175,6 @@ stats.ber = stats.bitErrors/stats.bits;
 stats.per = stats.packetErrors/stats.packets;
 end
 
-function recommendation = choose_recommendation(performance, mismatch)
-target = performance(performance.EbNoDb == 10 & performance.Occupancy == 0.25, :);
-% Use actual acquisition trials, not preamble detection with known timing.
-acquired = mismatch(strcmp(mismatch.Study, 'Acquired'), :);
-bestSync = max(acquired.SyncProbability);
-eligibleRates = acquired.HopRateHz(acquired.SyncProbability >= bestSync - 0.05);
-eligible = target(ismember(target.HopRateHz, eligibleRates), :);
-rates = unique(eligible.HopRateHz);
-summary = zeros(numel(rates), 4);
-for k = 1:numel(rates)
-    rows = eligible(eligible.HopRateHz == rates(k), :);
-    summary(k,:) = [rates(k), mean(rows.PER), mean(rows.PERLow), mean(rows.PERHigh)];
-end
-[~, bestIndex] = min(summary(:,2));
-best = summary(bestIndex,:);
-overlapping = summary(:,3) <= best(4) & summary(:,4) >= best(3);
-selectedRate = min(summary(overlapping,1));
-recommendation = struct('hopSetSize', 8, 'hopRateHz', selectedRate, ...
-    'rule', ['Largest orthogonal hop set; minimum mean PER among rates within ' ...
-    'five percentage points of best synchronization, choosing the slower ' ...
-    'rate when 95% confidence intervals overlap.']);
-end
-
 function value = dwell_ms(cfg, symbolsPerHop)
 value = 1e3 * symbolsPerHop / cfg.symbolRateHz;
 end
